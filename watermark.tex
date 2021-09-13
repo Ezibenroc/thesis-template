@@ -1,0 +1,13 @@
+% https://texblog.org/2012/02/17/watermarks-draft-review-approved-confidential/
+\usepackage{draftwatermark}
+\usepackage{datetime}
+ \SetWatermarkColor[rgb]{0.8,0.9,1}
+ \SetWatermarkText{%
+    \begin{minipage}{6in}
+    \begin{center}
+      \settimeformat{hhmmsstime}
+      {\fontsize{24}{12}\selectfont DRAFT\\\today, \currenttime}
+    \end{center}
+    \end{minipage}
+  }
+\SetWatermarkScale{1}

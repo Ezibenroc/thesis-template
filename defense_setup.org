@@ -1,0 +1,147 @@
+#+TITLE: Streaming my PhD defense on YouTube
+#+LANGUAGE: EN
+#+STARTUP: overview indent inlineimages logdrawer hidestars
+
+In this post, I describe the setup I used for my PhD defense. The jury and I
+were in a video-conference with BigBlueButton (BBB) software, the defense was
+also live-streamed on YouTube for the public. The resulting video can be found
+[[https://youtu.be/J3N1qS5gcGI][here]].
+
+* Table of content                                                      :TOC:
+- [[#my-system][My system]]
+- [[#what-to-stream][What to stream?]]
+- [[#obs-setup][OBS setup]]
+  - [[#general-settings][General settings]]
+  - [[#scenes][Scenes]]
+- [[#using-the-webcam-on-several-applications-silmutaneously][Using the webcam on several applications silmutaneously]]
+- [[#reduce-the-microphone-noise][Reduce the microphone noise]]
+- [[#audio-hardware][Audio hardware]]
+
+* My system
+Some steps may differ, depending on your hardware and operating system. I used
+my laptop, a Dell Latitude 5480 with an Intel i7-7820HQ CPU and 16 GB of
+memory. The operating system was Debian 10, with Linux kernel =4.19.0-16-amd64=.
+
+The defense was streamed with the OBS software. I installed it with the usual
+=apt install= and got the package version =22.0.3+dfsg1-1=.
+* What to stream?
+Initially, I wanted to directly stream the BBB window, for convenience. In BBB
+you can upload the PDF of your slides and make your entire presentation within
+BBB, with a nice dot pointer.
+
+When I uploaded my slides however, BBB did not render them properly, the font
+was wrong. My slides were done using LaTeX and Beamer, with the [[https://github.com/matze/mtheme][Metropolis]]
+theme, which uses Fira font. I fixed this by rasterizing the slides, as follows
+(based on this [[https://superuser.com/questions/802569/how-to-distill-rasterize-a-pdf-in-linux/1588781#1588781][post]]):
+#+BEGIN_SRC sh
+convert -density 600 +antialias slides.pdf output.pdf
+gs -q -dNOPAUSE -dBATCH -dPDFSETTINGS=/prepress -sDEVICE=pdfwrite -sOutputFile=slides_rasterized.pdf output.pdf && rm output.pdf
+#+END_SRC
+
+However, I was unhappy about the result, I found the slides in the YouTube
+stream not so pretty. In the end, I changed my setup. Instead of uploading the
+slides to BBB I shared my screen, and instead of streaming the BBB window I
+streamed the PDF viewer window.
+
+I was used to the default PDF viewer on my system, =evince=. Thanks to my advisor,
+I discovered the [[http://impressive.sourceforge.net/][impressive]] viewer, which is much better for a presentation. I
+launched it with this command:
+#+BEGIN_SRC sh
+impressive --noquit --tracking -T 100 -t Crossfade --fake-fullscreen -g 1920x1080 slides.pdf
+#+END_SRC
+Pro-tip: in impressive, use =Enter= to focus on something and =Z= to zoom. Also,
+read the man-page, it has a lot of very nice features.
+* OBS setup
+I describe here how I configured OBS itself.
+** General settings
+In =File= then =Parameter=, I changed a few things.
+- In the =Stream= tab, I selected =YouTube/YouTube Gaming=. Here, I entered the
+  stream key (obtained from YouTube Studio).
+- In the =Output= tab, I changed the bitrate to 6000 (the default one was too low,
+  YouTube gave a warning).
+- In the =Video= tab, I changed both the base resolution and the output resolution
+  to 1920x1080. I also changed the FPS to 30.
+** Scenes
+As I said, the defense was carried on BigBlueButton and streamed on YouTube. I
+created four different scenes in OBS with various layouts.
+1. Welcome scene, used at the very start of the stream. I used an image (my
+   first slide), with no camera and no audio.
+2. Deliberation scene, used while the jury is deliberating. I used a different
+   image (a photo with a written text), with no camera and no audio.
+3. Discussion scene, used during the questions of the jury. I used a window
+   capture (Xcomposite) of my Firefox window with BBB, cropped by 150px at the
+   top to remove the URL.
+4. Presentation scene, used during my talk. I used a window capture (Xcomposite)
+   of my PDF viewer and I added my webcam on the side (video capture
+   V4L2). Important: I needed to disable video buffering for the camera,
+   otherwise it was not properly synchronized with the rest (double click on the
+   source, then scroll down and untick the box).
+In both the scenes 3 and 4, I also had two audio sources. I had the audio output
+of my laptop (PulseAudio) to hear the jury and my microphone (Alsa).
+
+In all scenes I needed to mute the two default audio sources that appear in the
+audio mixer, to truly have no audio in the first two scenes and only the audio I
+selected in the two last scenes.
+* Using the webcam on several applications silmutaneously
+As described above, I needed to use my webcam in two different applications,
+Firefox (for BBB) and OBS. This is not possible natively. To fix that, I found
+this [[https://debian-facile.org/doc:multimedia:v4l2loopback][tutorial]] and this [[https://askubuntu.com/questions/165727/is-it-possible-for-two-processes-to-access-the-webcam-at-the-same-time][question]].
+
+First, install the kernel module:
+#+begin_src sh :results output :exports both
+sudo apt install v4l2loopback-dkms v4l2loopback-utils ffmpeg
+#+end_src
+
+Load the kernel module and create /dev/video5:
+#+begin_src sh :results output :exports both
+sudo modprobe v4l2loopback exclusive_caps=1 video_nr=5  # creates `/dev/video5`
+#+end_src
+
+Send the webcam to the virtual device:
+#+begin_src sh :results output :exports both
+ffmpeg -i /dev/video0 -f v4l2 -codec:v rawvideo -pix_fmt yuv420p /dev/video5
+#+end_src
+
+Then, we can choose the "dummy device" instead of the default camera in BBB and
+OBS.
+
+Note: sometimes, when I started Firefox with BBB, for some reason it used the
+hardware device for the webcam instead of asking me or using the dummy
+device. Here the solution was to revoke the authorization to use the camera, so
+that it asks again.
+* Reduce the microphone noise
+I used a good microphone (see next section), but still had some white noise in
+the background. To fix this, we can process the audio with pulseaudio.
+
+I used two links, this [[https://askubuntu.com/questions/18958/realtime-noise-removal-with-pulseaudio][question]] and this [[https://www.freedesktop.org/wiki/Software/PulseAudio/Documentation/User/Modules/#module-echo-cancel][documentation]].
+
+I simply added this line in the file =/etc/pulse/default.pa=:
+#+BEGIN_SRC
+load-module module-echo-cancel source_name=noise_cancelled source_properties=device.description=noise_cancelled
+#+END_SRC
+Note that we can pass several arguments to the module. This line was enough for
+me, but more fancy configurations are possible.
+
+Then, simply go to the OS parameters to change the audio input source and choose
+=noise_cancelled=.
+* Audio hardware
+In my very first rehearsals, I used the integrated microphone of my laptop. As
+expected, the sound was terrible.
+
+I have at home a nice little microphone for my camera (the Rode VideoMicro), so
+I started to use it, which gave much better results.
+
+My laptop had only one jack entry and I needed to plug both the microphone and
+the earphone (I could not use the speakers of the laptop, to avoid any
+echo). Hence, I bought a cheap [[https://www.amazon.fr/gp/product/B07MR5TPKV/ref=ppx_yo_dt_b_asin_title_o00_s00?ie=UTF8&psc=1][adapter]].
+
+With this setup, the sound of my microphone was not very good, I could hear some
+echo. My guess is that the cheap adapter is crappy and we have signal
+interferences between the input and the output. Fortunately, I had at home an
+USB DAC headphone amplifier (the FiiO Olympus 2 E10K). Thus, I could plug my
+earphones on this amplifier and my microphone directly on the laptop jack entry,
+without using the adapter. This is obviously an overkill solution, but this
+worked well.
+
+An easy alternative would be to use a headset with an integrated microphone, but
+I did not have this at home.

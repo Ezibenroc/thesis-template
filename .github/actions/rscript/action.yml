@@ -1,0 +1,11 @@
+name: Github Action for running a Rscript
+author: Tom Cornebize
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.script }}
+inputs:
+  script:  # id of input
+    description: 'R script to execute'
+    required: true

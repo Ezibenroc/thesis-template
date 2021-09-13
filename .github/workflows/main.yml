@@ -1,0 +1,45 @@
+name: Compilation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  compilation:
+    runs-on: ubuntu-latest
+    name: Compilation of the thesis
+    steps:
+    - name: Set up the repository
+      uses: actions/checkout@v2
+      with:
+          fetch-depth: 0
+    - name: Manuscript compilation
+      id: compilation
+      uses: ./.github/actions/compilation
+      with:
+          compilation-target: thesis.pdf
+    - name: Checkout the gh-pages branch
+      run: |
+          cp -r .github /tmp
+          git checkout gh-pages
+          cp -r /tmp/.github .
+          mkdir -p build
+          git config --global user.email "john.doe@example.com"
+          git config --global user.name "John Doe"
+    - name: File informations
+      run: |
+          echo "Number of pages : ${{ steps.compilation.outputs.nb_pages }}"
+          echo "File size       : ${{ steps.compilation.outputs.file_size }}"
+          test -f build/thesis_data.csv || echo "timestamp,commit,nb_pages,file_size,compilation_duration" > build/thesis_data.csv
+          echo "$(date '+%Y-%m-%d %H:%M:%S'),$GITHUB_SHA,${{ steps.compilation.outputs.nb_pages }},${{ steps.compilation.outputs.file_size }},${{ steps.compilation.outputs.compilation_duration }}" >> build/thesis_data.csv
+    - name: Generation of the evolution plot
+      uses: ./.github/actions/rscript
+      with:
+          script: draw_evolution_plots.R
+    - name: Deployment to gh-pages
+      run: |
+          cp -f thesis.pdf build
+          git add build
+          git commit -am "New compilation"
+          git push

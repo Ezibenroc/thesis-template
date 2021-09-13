@@ -1,0 +1,125 @@
+% *** SPECIFIC MACROS ***
+% specific macro definition for the paper
+%
+% requires amsthm, xspace
+
+% theorem-like environment
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}{Proposition}
+\newtheorem{propty}{Property}
+\newtheorem{defn}{Definition}
+
+% asymptotic complexity (Landau) notations
+\newcommand{\landauO}{\ensuremath{\mathcal{O}}\xspace}
+\newcommand{\landauOmega}{\ensuremath{\Omega}\xspace}
+\newcommand{\landauTheta}{\ensuremath{\Theta}\xspace}
+\newcommand{\landauo}{\ensuremath{o}\xspace}
+\newcommand{\landauomega}{\ensuremath{\omega}\xspace}
+\newcommand{\landauorder}{\ensuremath{\sim}\xspace}
+
+% scheduling notations
+\newcommand{\graham}[3]{\mbox{\ensuremath{#1\mid#2\mid#3}}}
+\newcommand{\Cmax}{\ensuremath{C_{\max}}\xspace}
+
+% complexity classes
+\newcommand{\cNP}{\textbf{NP}\xspace}  % bold notations
+\newcommand{\cP}{\textbf{P}\xspace}
+% \newcommand{\cNP}{\ensuremath{\mathcal{N\!P}}\xspace}  % round notations
+% \newcommand{\cP}{\ensuremath{\mathcal{P}}\xspace}
+
+% Machine states
+\newcommand{\computing}{computing}
+\newcommand{\idle}{idle}
+\newcommand{\off}{of\!f}
+\newcommand{\on}{on}
+\newcommand{\ontooff}{\on\rightarrow\off}
+\newcommand{\offtoon}{\off\rightarrow\on}
+
+% CCGRID 2017
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+
+% Cluster 2017
+\newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
+
+\newlength\mylen % algorithm2e hack
+\newcommand\myinput[1]{%
+  \settowidth\mylen{\KwIn{}}%
+  \setlength\hangindent{\mylen}%
+  \hspace*{\mylen}#1\\}
+
+\newcommand\myoutput[1]{% algorithm2e hack
+  \settowidth\mylen{\KwOut{}}%
+  \setlength\hangindent{\mylen}%
+  \hspace*{\mylen}#1\\}
+
+
+% Float environments
+\renewcommand{\topfraction}{0.8}
+\renewcommand{\bottomfraction}{0.8}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% Modular compilation %
+%%%%%%%%%%%%%%%%%%%%%%%
+\newif\ifwatermark
+\watermarkfalse
+
+\newif\iftotalcompilation
+\totalcompilationtrue
+
+\newcommand{\inputchapter}[2]{%
+  \ifdef{#1}%
+    {\input{#2}\cleardoublepage}%
+    {}%
+}
+
+% Modeling notations
+\newcommand{\model}[2][]{\ensuremath{\bm{M}_{#1}\ifthenelse{\equal{#2}{}}{}{\!-\!}{#2}}\xspace}
+\newcommand{\modelp}[2][]{\ensuremath{\bm{M'}_{#1}\!\ifthenelse{\equal{#2}{}}{}{\!-\!}{#2}}\xspace}
+\newcommand{\noise}[2][]{\ensuremath{\bm{N}_{#1}\ifthenelse{\equal{#2}{}}{}{\!-\!}{#2}}\xspace}
+\newcommand{\noisep}[2][]{\ensuremath{\bm{N'}_{#1}\!\ifthenelse{\equal{#2}{}}{}{\!-\!}{#2}}\xspace}
+\newcommand{\norm}{\ensuremath{\mathcal{N}}\xspace}
+\newcommand{\mcdots}{\ensuremath{\!\cdot\!\cdot\!\cdot\!}\xspace}
+\newcommand{\unif}[2]{\ensuremath{\mathcal{U}\left({#1},{#2}\right)}\xspace}
+
+% Abreviations
+\newcommand{\eg}{e.g.\@\xspace}
+\newcommand{\ie}{i.e.\@\xspace}
+\newcommand{\aka}{a.k.a.\@\xspace}
+\newcommand{\resp}{resp.\@\xspace}
+\newcommand{\etal}{et~al.\@\xspace}
+\newcommand{\dgemm}{\texttt{dgemm}\@\xspace}
+\newcommand{\recv}{\texttt{MPI\_Recv}\@\xspace}
+\newcommand{\send}{\texttt{MPI\_Send}\@\xspace}
+\newcommand{\isend}{\texttt{MPI\_Isend}\@\xspace}
+\newcommand{\iprobe}{\texttt{MPI\_Iprobe}\@\xspace}
+\newcommand{\pyce}{\texttt{pycewise}\@\xspace}
+\newcommand{\peanut}{\texttt{peanut}\@\xspace}
+\newcommand{\cashew}{\texttt{cashew}\@\xspace}
+\newcommand{\execo}{\texttt{execo}\@\xspace}
+\newcommand{\enoslib}{\texttt{EnOSlib}\@\xspace}
+\newcommand{\cluster}[2][]{\textcolor{myblue}{\texttt{#2\ifthenelse{\equal{#1}{}}{}{-#1}}}\@\xspace}
+\newcommand{\dahu}[1][]{\cluster[#1]{dahu}}
+\newcommand{\dada}[1]{\cluster[#1]{dahu}}  % for some reason, optionnal arguments do not work in subfigure, so I need this crap...
+\newcommand{\drac}{\cluster{drac}}
+\newcommand{\yeti}[1][]{\cluster[#1]{yeti}}
+\newcommand{\troll}[1][]{\cluster[#1]{troll}}
+\newcommand{\gros}{\cluster{gros}}
+\newcommand{\grisou}[1][]{\cluster[#1]{grisou}}
+\newcommand{\grvingt}{\cluster{grvingt}}
+\newcommand{\paravance}{\cluster{paravance}}
+\newcommand{\parasilo}[1][]{\cluster[#1]{parasilo}}
+\newcommand{\paranoia}{\cluster{paranoia}}
+\newcommand{\chiclet}{\cluster{chiclet}}
+\newcommand{\chetemi}{\cluster{chetemi}}
+\newcommand{\pyxis}{\cluster{pyxis}}
+\newcommand{\nova}{\cluster{nova}}
+\newcommand{\taurus}{\cluster{taurus}}
+\newcommand{\ecotype}[1][]{\cluster[#1]{ecotype}}
+
+% Referencing several times a footnote
+% See https://tex.stackexchange.com/a/54240
+\newcommand{\savefootnote}[2]{\footnote{\label{#1}#2}}
+\newcommand{\repeatfootnote}[1]{\textsuperscript{\ref{#1}}}

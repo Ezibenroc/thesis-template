@@ -1,0 +1,367 @@
+%!TEX encoding = UTF-8 Unicode
+
+% rubber: path ./sty
+% rubber: path ./fig
+% rubber: path ./img
+% rubber: path ./inputs
+% rubber: shell_escape
+
+% The structure of this document is based on the my-thesis.tex example provided
+% with the cleanthesis package (see http://cleanthesis.der-ric.de/).
+% It also is inspired by the PhD manuscripts of Raphaël Bleuse, David Beniamine
+% (see https://github.com/dbeniamine/Ph.D_thesis) and David Glesser.
+% Uneeded packages and comments have been stripped out.
+
+\pdfobjcompresslevel 0  % Produce PDF file respecting CINES requirements
+
+\documentclass[%
+    paper=A4,              % paper size
+    twoside=true,          % onesite or twoside printing
+    openright,             % doublepage cleaning ends up right side
+    parskip=half,          % spacing value / method for paragraphs
+    chapterprefix=true,    % prefix for chapter marks
+    11pt,                  % font size
+    headings=normal,       % size of headings
+    bibliography=totoc,    % include bib in toc
+    listof=totoc,          % include listof entries in toc
+    titlepage=on,          % own page for each title page
+    captions=tableabove,   % display table captions above the float env
+    chapterprefix=false,   % do not display a prefix for chapters
+    appendixprefix=false,  % do not display a prefix for appendix chapters
+    draft=false,           % value for draft version
+]{scrreprt}
+
+
+% === PACKAGES IMPORT / CONFIGURATION =========================================
+% --- ENCODING / FONTS -----------------
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{lipsum}
+
+% --- SPECIFIC ABBREVIATIONS MACROS -------------
+
+\input{macros.local.tex}
+\input{macros.include.tex}
+
+
+\ifwatermark
+\input{watermark}
+\fi
+
+% \usepackage{kpfonts}
+
+% --- i18n, l10n -----------------------
+
+\usepackage[french,english]{babel}  % load default language last
+\usepackage[french,english]{isodate}  % load default language last
+
+% --- PAGE SETTING ---------------------
+
+\usepackage[%
+    figuresep=colon,          % label separator for captions
+    hangfigurecaption=false,  % use hanging figure label (within margin)
+    hangsection=true,         % use hanging section label (within margin)
+    hangsubsection=true,      % use hanging subsection label (within margin)
+    colorize=full,            % define color mode
+    colortheme=bluemagenta,   % what colors to use
+    bibsys=biber,             % citation manamgement engine
+    bibfile=references,       % bibtex file
+    bibstyle=alphabetic,      % reference style
+]{cleanthesis}
+
+% In some 'online' bibtex entries, we do have a DOI, thanks to Zenodo. Here we want to display it.
+\AtEveryBibitem{%
+    \ifentrytype{online}{
+        \csappto{blx@bbx@\thefield{entrytype}}{% put at end of entry
+            \iffieldundef{doi}{}{%
+                \printfield{doi}
+            }
+        }
+    }
+}
+
+% --- GRAPHICS / FIGURES ---------------
+
+\usepackage{epsfig}  % XXX: to be removed when CCPE figures are out
+
+\newcommand{\SetFigFont}[3]{\fontsize{#1}{#2pt}\normalfont\sffamily}  % XXX: to be removed when CCPE figures are out
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.13}
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees,calc,decorations.text}
+
+\usepackage{bm}
+
+\usepackage{titlesec}
+
+% --- MATHEMATICS TYPESETTING ----------
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% --- MODULAR CHAPTER COMPILATION -----
+
+\usepackage{etoolbox}
+
+% --- MISC. PACKAGES -------------------
+
+\usepackage[a4paper]{uga}  % UGA title page style (see titlepage.tex)
+\usepackage{xspace}  % easy macros definition
+\usepackage{booktabs}
+%\usepackage[font=footnotesize]{subfig}
+\usepackage{subfigure}
+\usepackage[ruled,noend]{algorithm2e}
+\usepackage{csquotes}
+\usepackage{tabularx}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\usepackage{pdflscape}
+
+\usepackage[binary-units,group-digits,group-separator={,}]{siunitx}
+% Uncomment to have stuff like 6.7e-11, keep it commented for 6.7\times10^{-11}
+%\sisetup{output-exponent-marker=\ensuremath{\mathrm{e}}}
+\DeclareSIUnit\flop{Flop}
+\DeclareSIUnit\flops{\flop\per\second}
+\newcommand{\Num}[1]{\num[group-separator={,}]{#1}\xspace}
+\newcommand{\NSI}[2]{\SI[group-separator={,}]{#1}{#2}\xspace}
+\DeclareSIUnit\core{core}
+
+\usepackage{color,colortbl}
+\definecolor{gray98}{rgb}{0.98,0.98,0.98}
+\definecolor{gray20}{rgb}{0.20,0.20,0.20}
+\definecolor{gray25}{rgb}{0.25,0.25,0.25}
+\definecolor{gray16}{rgb}{0.161,0.161,0.161}
+\definecolor{gray80}{rgb}{0.8,0.8,0.8}
+\definecolor{gray60}{rgb}{0.6,0.6,0.6}
+\definecolor{gray30}{rgb}{0.3,0.3,0.3}
+\definecolor{bgray}{RGB}{248, 248, 248}
+\definecolor{amgreen}{RGB}{77, 175, 74}
+\definecolor{amblu}{RGB}{55, 126, 184}
+\definecolor{amred}{RGB}{228,26,28}
+\definecolor{amdove}{RGB}{102,102,122}
+\usepackage{xcolor}
+\definecolor{myblue}{cmyk}{1, .50, .10, .01}  % see definition of "bluemagenta" in cleanthesis.sty
+\usepackage[procnames]{listings}
+\lstset{ %
+    backgroundcolor=\color{gray98},    % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+    basicstyle=\ttfamily\scriptsize,        % the size of the fonts that are used for the code
+    breakatwhitespace=false,          % sets if automatic breaks should only happen at whitespace
+    breaklines=true,                  % sets automatic line breaking
+    showlines=true,                   % sets automatic line breaking
+    captionpos=b,                     % sets the caption-position to bottom
+    commentstyle=\color{gray60},      % comment style
+    extendedchars=true,               % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+    frame=single,                     % adds a frame around the code
+    keepspaces=true,                  % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+    columns=flexible,
+    keywordstyle=\color{amblu},       % keyword style
+    procnamestyle=\color{colorfuncall},      % procedures style
+    language=[95]fortran,             % the language of the code
+    numbers=left,                     % where to put the line-numbers; possible values are (none, left, right)
+    numbersep=5pt,                    % how far the line-numbers are from the code
+    numberstyle=\tiny\color{gray20},  % the style that is used for the line-numbers
+    rulecolor=\color{gray20},         % if not set, the frame-color may be changed on line-breaks within not-black text (\eg comments (green here))
+    showspaces=false,                 % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+    showstringspaces=false,           % underline spaces within strings only
+    showtabs=false,                   % show tabs within strings adding particular underscores
+    stepnumber=2,                     % the step between two line-numbers. If it's 1, each line will be numbered
+    stringstyle=\color{amdove},       % string literal style
+    tabsize=2,                        % sets default tabsize to 2 spaces
+    % title=\lstname,                    % show the filename of files included with \lstinputlisting; also try caption instead of title
+    procnamekeys={call}
+}
+\definecolor{colorfuncall}{rgb}{0.6,0,0}
+
+% --- PDF SUPPORT ----------------------
+
+\usepackage{bookmark,hyperref}  % import as last package
+
+%% Citing software
+\ExecuteBibliographyOptions{
+    halid=true,
+    swhid=true,
+    swlabels=true,
+    vcs=true,
+    license=true
+}
+
+\hypersetup{
+    unicode=true,
+    plainpages=false,
+    colorlinks=false,
+    pdfborder={0 0 0},
+    breaklinks=true,  % allow line breaks inside links
+    bookmarksnumbered=true,
+    bookmarksopen=true,
+}
+
+% --- Custom TODO line ------------------------
+\usepackage{mdframed}
+\newmdenv[%
+  linecolor=red,%
+  backgroundcolor=red!20,%
+  linewidth=3pt,%
+  hidealllines=true,%
+  leftline=true,%
+]{todoenv}
+\newcommand{\todo}[1]{\begin{todoenv}#1\end{todoenv}}
+\newcommand{\todoC}[1]{\todo{#1}}
+
+
+% === MACROS DEFINITION =======================================================
+
+% --- COMMON ABBREVIATIONS MACROS -------------
+
+% latin abbreviations, see:
+%   - http://www.sussex.ac.uk/informatics/punctuation/capsandabbr/abbr
+% comment by Sascha Hunold, see also:
+%   - https://www.ieee.org/documents/style_manual.pdf
+%     (p. 32, Short Reference List of Italics)
+%   - http://web.ece.ucdavis.edu/~jowens/commonerrors.html
+
+% === META DATA ===============================================================
+\title{One great title}
+\author{John \textsc{Doe}}
+
+% fill pdf meta data
+\makeatletter
+\hypersetup{pdftitle=\@author's thesis}
+\hypersetup{pdfsubject=\@title}
+\hypersetup{pdfauthor=\@author}
+\makeatother
+
+\usepackage{enumitem}
+
+% === DOCUMENT CONTENT ========================================================
+
+\begin{document}
+
+% --- FRONT MATTER ---------------------
+
+\iftotalcompilation
+\pdfbookmark[-1]{Front Matter}{Front Matter}
+
+\pagenumbering{gobble}  % do not count title page
+\pagestyle{empty}  % no header nor footer
+
+\input{titlepage.tex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+\pagenumbering{roman}  % roman page numbering (e.g., i ii iii), reset counter
+
+\input{dedication.tex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+%
+\input{epigraph.tex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+\pagestyle{plain}  % display page number only
+
+\input{acknowledgments.tex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+\input{abstract-front.tex} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+\setcounter{tocdepth}{2}  % define depth of ToC
+\phantomsection\addcontentsline{toc}{chapter}{{\contentsname}}  % display ToC to ToC
+
+% Add a bit of space in the ToC
+\makeatletter
+\pretocmd{\chapter}{\addtocontents{toc}{\protect\addvspace{15\p@}}}{}{}
+\pretocmd{\section}{\addtocontents{toc}{\protect\addvspace{5\p@}}}{}{}
+\makeatother
+
+\tableofcontents %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\fi
+
+% --- MAIN MATTER ----------------------
+
+\pagenumbering{arabic}  % arabic page numbering (e.g., 1 2 3), reset counter
+\pagestyle{scrheadings}  % display header and footer
+\addtocontents{toc}{\bigskip}  % visual hint for numbering change in ToC
+
+
+
+% main chapters go here
+\bookmarksetup{startatroot}
+\inputchapter{\includechapterintroduction}{chapter_introduction.tex}
+
+\bookmarksetup{startatroot}  % https://stackoverflow.com/questions/1483396/how-to-explicitly-end-a-part-in-latex-with-hyperref
+\addtocontents{toc}{\bigskip}
+\inputchapter{\includechapterconclusion}{chapter_conclusion.tex}
+
+% --- BACK MATTER ----------------------
+
+\iftotalcompilation
+\pdfbookmark[-1]{Back Matter}{Back Matter}
+
+\pagenumbering{arabic}  % arabic page numbering (e.g., 1 2 3), reset counter
+\renewcommand*{\thepage}{A\arabic{page}}  % prepend A to appendix page number
+\pagestyle{scrheadings}  % display header and footer
+\addtocontents{toc}{\bigskip}  % visual hint for numbering change in ToC
+\fi
+
+\appendix
+\inputchapter{\includechapterappendix}{chapter_appendix.tex}
+
+\iftotalcompilation
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+{
+    \setstretch{1.1}
+    \renewcommand{\bibfont}{\normalfont\small}
+    \setlength{\biblabelsep}{0pt}
+    \setlength{\bibitemsep}{0.5\baselineskip plus 0.5\baselineskip}
+    \printbibliography
+}
+
+{\listoffigures \let\cleardoublepage\  \listoftables} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% List of publications %%%%%%%%%%%%%%%%%
+% {
+%     \clearpage
+%     Additionally, the work conducted in this dissertation directly led to the
+%     following communications.
+
+%     \begin{refsection}
+%     \makeatletter\@beginparpenalty=10000\makeatother  % prevent page break before list
+%     \defbibenvironment{itembib}{\itemize}{\enditemize}{\item}
+%     \nocite{*}
+%     %
+%     \paragraph{Peer-reviewed international conferences}
+%     \printbibliography[heading=none,env=itembib,keyword={own},keyword={conference}]
+%     %
+%     \paragraph{Peer-reviewed international workshops}
+%     \printbibliography[heading=none,env=itembib,keyword={own},keyword={workshop}]
+%     \paragraph{National workshops}
+%     \printbibliography[heading=none,env=itembib,keyword={own},keyword={nworkshop}]
+%     \end{refsection}
+% }
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% List of publications %%%%%%%%%%%%%%%%%
+
+
+\cleardoublepage %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+
+% --- BACK COVER -----------------------
+
+\pagenumbering{gobble}  % do not count any more
+\pagestyle{empty}  % no header nor footer
+
+\cleardoubleevenpage  % ensure even page for back cover %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\input{backcover} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  COMMENTED OUT FOR SEPARATE CHAPTER COMPILATIONS
+\fi
+
+% === END OF DOCUMENT =========================================================
+
+\end{document}

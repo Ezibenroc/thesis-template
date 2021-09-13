@@ -1,0 +1,19 @@
+name: Github Action for LaTeX
+author: Tom Cornebize
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.compilation-target }}
+inputs:
+  compilation-target:  # id of input
+    description: 'What to compile'
+    required: false
+    default: 'all'
+outputs:
+  nb_pages:
+    description: 'The number of pages of the resulting PDF file'
+  file_size:
+    description: 'The size of the resulting PDF file'
+  compilation_duration:
+    description: 'The duration of the PDF compilation'

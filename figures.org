@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+# -*- org-confirm-babel-evaluate: nil -*-
+# -*- mode: org -*-
+#+STARTUP: overview indent inlineimages logdrawer hidestars
+* Appendix
+** CO2 emission of one cor hour
+The data comes from the paper "Estimation de l'empreinte carbone d'une
+heure.coeur de calcul" (Berthoud et al).
+
+Let's redo a plot equivalent to the pie chart from page 11, but simplified and
+with bars.
+
+#+NAME: co2_gricad
+| source                               | kind          |  co2 |
+|--------------------------------------+---------------+------|
+| Serveurs de calcul (fabrication)     | manufacturing | 1.16 |
+| Serveurs environnement (fabrication) | manufacturing | 0.38 |
+| Serveurs de calcul (electricité)     | consumption   | 1.79 |
+| Serveurs environnement (électricité) | consumption   | 0.64 |
+| Déplacements domicile-travail        | commute       | 0.55 |
+| Équipements du personnel             | Autre         | 0.06 |
+| Énergie du personnel                 | Autre         | 0.05 |
+| Déplacements professionnels          | Autre         | 0.06 |
+
+# #+begin_src R :var df=co2_gricad :results output  :exports both :session *R*
+#+begin_src R :var df=co2_gricad :results output graphics :file (org-babel-temp-file "figure" ".png") :exports both :width 600 :height 400 :session *R*
+library(dplyr)
+library(ggplot2)
+plot = df %>%
+    group_by(kind) %>%
+    summarise(co2=sum(co2)) %>%
+    mutate(ratio=co2/sum(co2)) %>%
+    mutate(kind=ifelse(
+        kind=="manufacturing", "Manufacturing", ifelse(
+        kind=="consumption", "Electrical consumption", ifelse(
+        kind=="commute", "Daily commute of employees", "Other")))) %>%
+    arrange(-ratio) %>%
+    mutate(kind=factor(kind, unique(kind))) %>%
+    as.data.frame() %>%
+    ggplot() +
+        aes(x=kind, y=ratio, fill=kind) +
+        geom_bar(stat="identity", width=0.4, show.legend=F) +
+        scale_y_continuous(labels = scales::percent_format(accuracy=1)) +
+        ylab("Share of CO2e emission") +
+        xlab("Emission source") +
+        scale_fill_brewer(palette="Dark2") +
+        theme_bw()
+ggsave(filename='img/co2_per_hour.pdf', plot=plot, width=7, height=3)
+plot
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-djv5WN/figureadwRTH.png]]
