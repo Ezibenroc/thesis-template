@@ -21,7 +21,7 @@ df_lagged = df %>%
     mutate_at(vars(-("timestamp")),lag)
 df_combined = bind_rows(old=df, new=df_lagged, .id="source") %>%
     arrange(timestamp, source)
-steps = data.frame(timestamp=c("2020/11/01", "2021/03/28", "2021/06/02"),
+steps = data.frame(timestamp=c("2021/09/01", "2022/01/14", "2022/03/08"),
                    event=c("Start writing", "Finish writing", "Defense")) %>%
     mutate(timestamp=parse_datetime(as.character(timestamp), "%Y/%m/%d"))
 
