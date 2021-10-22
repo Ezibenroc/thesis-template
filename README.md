@@ -1,6 +1,11 @@
 # General
 
-The skeleton of this thesis manuscript was greatly inspired by the ones of Clément Mommessin and Millian Poquet, which in turn are inspired by Raphaël Bleuse, David Beniamine and David Glesser.
+The skeleton of this thesis manuscript was greatly inspired by the ones of Tom Cornebize, Clément Mommessin and Millian Poquet, which in turn are inspired by Raphaël Bleuse, David Beniamine and David Glesser.
+
+Links:
+- [Template repository](https://github.com/Ezibenroc/thesis-template)
+- [Tom Cornebize's thesis repository](https://github.com/Ezibenroc/thesis)
+- [Continuous integration plots](https://cornebize.net/thesis/)
 
 The makefile provides convenient recipes to build the whole thesis or unique chapters, to check for missing refs, unreferenced labels or uncited references.
 Feel free to hack the template however you like.
